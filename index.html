@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Jose Parreno Garcia" />
+
+
+<title>Notes Logistic Regression - Standford ML Andrew Ng</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-1.1/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Notes Andrew NG course</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Logistic regression</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Notes Logistic Regression - Standford ML Andrew Ng</h1>
+<h4 class="author"><em>Jose Parreno Garcia</em></h4>
+<h4 class="date"><em>March 2018</em></h4>
+
+</div>
+
+<div id="TOC">
+<ul>
+<li><a href="#what-is-logistic-regression"><span class="toc-section-number">1</span> What is Logistic Regression?</a><ul>
+<li><a href="#intuition-behind-logistic-regression"><span class="toc-section-number">1.1</span> Intuition behind logistic regression</a></li>
+</ul></li>
+<li><a href="#introducing-the-logistic-function"><span class="toc-section-number">2</span> Introducing the logistic function</a><ul>
+<li><a href="#steps-to-calculate-logit"><span class="toc-section-number">2.1</span> Steps to calculate logit</a><ul>
+<li><a href="#step-1"><span class="toc-section-number">2.1.1</span> Step 1</a></li>
+<li><a href="#additional-info-for-step-1"><span class="toc-section-number">2.1.2</span> Additional info for step 1</a></li>
+<li><a href="#step-2"><span class="toc-section-number">2.1.3</span> Step 2</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#effect-of-threshold-in-model-performance"><span class="toc-section-number">3</span> Effect of threshold in model performance</a><ul>
+<li><a href="#confusion-matrix"><span class="toc-section-number">3.1</span> Confusion matrix</a><ul>
+<li><a href="#calculating-the-parameters-from-the-confusion-matrix"><span class="toc-section-number">3.1.1</span> Calculating the parameters from the confusion matrix</a></li>
+<li><a href="#small-comment-on-accuracy"><span class="toc-section-number">3.1.2</span> Small comment on accuracy</a></li>
+</ul></li>
+<li><a href="#roc-curves"><span class="toc-section-number">3.2</span> ROC curves</a><ul>
+<li><a href="#auc---area-under-the-curve"><span class="toc-section-number">3.2.1</span> AUC - Area under the curve</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#hypothesis"><span class="toc-section-number">4</span> Hypothesis</a></li>
+<li><a href="#understanindg-the-sigmoid-function"><span class="toc-section-number">5</span> Understanindg the sigmoid function</a><ul>
+<li><a href="#example-1-general-sigmoid-function"><span class="toc-section-number">5.1</span> EXAMPLE 1: General sigmoid function</a></li>
+<li><a href="#example-2-linear-boundary"><span class="toc-section-number">5.2</span> EXAMPLE 2: Linear boundary</a></li>
+<li><a href="#example-3-circular-boundary"><span class="toc-section-number">5.3</span> EXAMPLE 3: Circular boundary</a></li>
+</ul></li>
+<li><a href="#cost-function"><span class="toc-section-number">6</span> Cost function</a><ul>
+<li><a href="#simplified-cost-function"><span class="toc-section-number">6.1</span> Simplified cost function</a></li>
+<li><a href="#choosing-the-parameters-using-gradient-descent"><span class="toc-section-number">6.2</span> Choosing the ?? parameters: using gradient descent</a></li>
+</ul></li>
+<li><a href="#multiclass-classification"><span class="toc-section-number">7</span> Multiclass classification</a><ul>
+<li><a href="#overfittingunderfitting"><span class="toc-section-number">7.1</span> Overfitting/underfitting</a></li>
+</ul></li>
+<li><a href="#introducing-regularization"><span class="toc-section-number">8</span> Introducing regularization</a><ul>
+<li><a href="#regularised-linear-regression"><span class="toc-section-number">8.1</span> Regularised linear regression</a></li>
+<li><a href="#regularised-logistic-regression"><span class="toc-section-number">8.2</span> Regularised logistic regression</a></li>
+<li><a href="#final-intuitation-for-the-regularization-parameter"><span class="toc-section-number">8.3</span> Final intuitation for the regularization parameter</a></li>
+</ul></li>
+<li><a href="#visualising-the-data"><span class="toc-section-number">9</span> Visualising the data</a><ul>
+<li><a href="#how-to-fix-this"><span class="toc-section-number">9.1</span> How to fix this?</a></li>
+<li><a href="#calculations"><span class="toc-section-number">9.2</span> Calculations</a></li>
+<li><a href="#effect-of-lambda"><span class="toc-section-number">9.3</span> Effect of lambda</a></li>
+</ul></li>
+</ul>
+</div>
+
+<style>
+body {
+text-align: justify}
+
+</style>
+<p><br></p>
+<pre class="r"><code>library(knitr)</code></pre>
+<p><br></p>
+<div id="what-is-logistic-regression" class="section level1">
+<h1><span class="header-section-number">1</span> What is Logistic Regression?</h1>
+<p>Both linear and logistic regression are used to predict certain results taking into consideration previous historical data. The main difference between them is the type of prediction each one does: 1. Linear regression ??? predicts any value. In order to do this, linear regression takes as input independent values CONTINUOUS VARIBLES, in other words, variables that can take any value, and hence, our prediction will also be a continuous variable and can take any value. 2. Logistic regression ??? it predicts the probability of bounded possible outcomes, in other words, logistic regression is a CLASSIFICATION algorithm.</p>
+<p>As mentioned, logistic regression is one of main and most simple CLASSIFICATION algorithms. It extends the idea of linear regression to cases where the dependent variable, y, only has two possible outcomes, called classes (careful, this only applies with binary logistic regression; multiple logistic regression deals with situations where the outcome can have three or more possible types (e.g., “disease A” vs. “disease B” vs. “disease C”)).</p>
+<p>Examples of dependent variables that could be used with logistic regression are predicting whether a new business will succeed or fail, predicting the approval or disapproval of a loan, and predicting whether a stock will increase or decrease in value. These are all called classification problems, since the goal is to figure out which class each observation belongs to.</p>
+<div id="intuition-behind-logistic-regression" class="section level2">
+<h2><span class="header-section-number">1.1</span> Intuition behind logistic regression</h2>
+<p>The following images show different classification examples.</p>
+<p><img src="images/1.png" width="530" /><img src="images/2.png" width="567" /><img src="images/3.png" width="752" /></p>
+<p>For us humans, it would be really easy to differentiate groups in each of the datasets, and we would immediately be able to draw a boundary that separated them, but, how can a machine do this? Moving onwards in this blog, we will be focusing on the example shown in the 3 figure, which represents a binary classification.</p>
+<p><br></p>
+</div>
+</div>
+<div id="introducing-the-logistic-function" class="section level1">
+<h1><span class="header-section-number">2</span> Introducing the logistic function</h1>
+<p>The logistic function is a model of the well-known sigmoid function, and the mathematical function which represent these is the following:</p>
+<p><img src="images/4.PNG" width="648" /></p>
+<p>For the sake of curiosity, just mention that the logistic function is used to describe many real-world situations, for example, population growth. This is easily understood by looking at the normalised graph: the initial stages suffer an exponential growth, but after some time, due to the competition for certain resources (bottle neck), the growth rate decreases until it gets to a stalemate and there is no growth.</p>
+<p>This is really cool, but how is this going to help us determine the probability of a classifying data into different classes?</p>
+<div id="steps-to-calculate-logit" class="section level2">
+<h2><span class="header-section-number">2.1</span> Steps to calculate logit</h2>
+<div id="step-1" class="section level3">
+<h3><span class="header-section-number">2.1.1</span> Step 1</h3>
+<p>The first step is to compute the probability that an observation belongs to class 1, using the Logistic Response Function. In this case, our t parameter (instead of being a temporal response), will be the linear regression equation:</p>
+<p><img src="images/5.png" width="304" /></p>
+<p>The coefficients, or <span class="math inline">\(??\)</span> values, are selected to maximize the likelihood of predicting a high probability for observations actually belonging to class 1, and predicting a low probability for observations actually belonging to class 0. See the graph to hint the coefficients we would like to achieve:</p>
+<p><img src="images/6.png" width="409" /></p>
+</div>
+<div id="additional-info-for-step-1" class="section level3">
+<h3><span class="header-section-number">2.1.2</span> Additional info for step 1</h3>
+<p>Another way to understanding the probabilities to classify elements into classes is by using ODDS:</p>
+<p><img src="images/7.PNG" width="698" /><img src="images/8.PNG" width="586" /></p>
+<p>This called the “Logit” and looks like linear regression.</p>
+</div>
+<div id="step-2" class="section level3">
+<h3><span class="header-section-number">2.1.3</span> Step 2</h3>
+<p>In the second step of logistic regression, a threshold value is used to classify each observation into one of the classes. For example, if we chose a threshold of 0.5, that would mean that if <span class="math inline">\(P(y=1) &gt; 0.5\)</span>, then the observation would be classified into class 1, and the rest into class 0.</p>
+<p>The threshold value is something the user can specify, so, which is the best value for it? This election often depends on error preferences and there are two types of errors that we need to take into consideration: false positives, and false negatives.</p>
+<p>A false positive error is made when the model predicts class 1, but the observation actually belongs to class 0. A false negative error is made when the model predicts class 0, but the observation actually belongs to class 1. The perfect model would classify all classes correctly: all 1´s (or trues) as 1´s, and all 0´s (or false) as 0´s. We would have then FN = FP = 0!! Fantastic!</p>
+<p><img src="images/9.PNG" width="347" /></p>
+<p><br></p>
+</div>
+</div>
+</div>
+<div id="effect-of-threshold-in-model-performance" class="section level1">
+<h1><span class="header-section-number">3</span> Effect of threshold in model performance</h1>
+<p>As we all know, the perfect predictive model doesn’t exist. So what happens when we choose different threshold values?</p>
+<ol style="list-style-type: decimal">
+<li>Higher threshold value. Classify as 1 if P(y=1) &gt; 0.7. The model is being more restrictive when classifying as 1´s, and therefore, more False Negative errors will be made.</li>
+<li>Lower threshold value. . Classify as 1 if P(y=1) &gt; 0.3. The model is now being less strict and we are classifying more examples as class 1, therefore, we are making more false positives errors.</li>
+</ol>
+<p>Ok, this is all very good to know, but how to choose the strategy to follow? How do we know if we want to make more FN errors or more FP errors? A fair answer to the previous question would be that to know which strategy to follow can initially depend on your experience and risk-averse problem you are trying to solve. Lets present 2 examples:</p>
+<p><strong>Example 1: Treating patients.</strong></p>
+<p>One application where decision-makers often have an error preference is in disease prediction. Suppose you built a model to predict whether or not someone will develop heart disease in the next 10 years. We will consider class 1 to be the outcome in which the person does develop heart disease, and class 0 the outcome in which the person does not develop heart disease. If you pick a high threshold, you will tend to make more false negative errors, which means that you predicted that the person would not develop heart disease, but they actually did. If you pick a lower threshold, you will tend to make more false positive errors, which means that you predicted they would develop heart disease, but they actually did not. In this case, a false positive error is often preferred. Unnecessary resources might be spent treating a patient who did not need to worry, but you did not let as many patients go untreated (which is what a false negative error does).</p>
+<p><strong>Example 2: Email junkbox.</strong></p>
+<p>Now, let’s consider spam filters. Almost every email provider has a built in spam filter that tries to detect whether or not an email message is spam. Let’s classify spam messages as class 1 and non-spam messages as class 0. Then if we build a logistic regression model to predict spam, we will probably want to select a high threshold. Why? In this case, a false positive error means that we predicted a message was spam, and sent it to the spam folder, when it actually was not spam. We might have just sent an important email to the junk folder! On the other hand, a false negative error means that we predicted a message was not spam, when it actually was. This creates a slight annoyance for the user (since they have to delete the message from the inbox themselves) but at least an important message was not missed.</p>
+<p><strong>To understand better how to choose the threshold value, we make use of the confusion matrix and the ROC curve.</strong></p>
+<div id="confusion-matrix" class="section level2">
+<h2><span class="header-section-number">3.1</span> Confusion matrix</h2>
+<p>A confusion matrix, also known as a contingency table or an error matrix, is a specific table layout that allows visualization of the performance of an algorithm. Each column of the matrix represents the instances in a predicted class, while each row represents the instances in an actual class. The name stems from the fact that it makes it easy to see if the system is confusing two classes (i.e. commonly mislabelling one as another). We have actually seen a confusion matrix in this paper before, with the image of true positives, true negatives, false positives and false negatives. Here goes another equivalent image:</p>
+<p><img src="images/10.PNG" width="740" /></p>
+<p><strong>Numeric example</strong></p>
+<p>Imagine we have created a classification system that has been trained to distinguish between cats, dogs and rabbits, a confusion matrix will summarize the results of testing the algorithm for further inspection. Assuming a sample of 27 animals - 8 cats, 6 dogs, and 13 rabbits, the resulting confusion matrix could look like the one below.</p>
+<p><img src="images/11.png" width="319" /></p>
+<div id="calculating-the-parameters-from-the-confusion-matrix" class="section level3">
+<h3><span class="header-section-number">3.1.1</span> Calculating the parameters from the confusion matrix</h3>
+<p><img src="images/12.png" width="727" /></p>
+<p>. SENSITIVITY: measures the proportion of positives which are correctly identified as such . SPECIFICITY: measures the proportion of negatives which are correctly identified as such . ACCURACY: measures the proportion of positives and negatives that have been correctly labelled.</p>
+</div>
+<div id="small-comment-on-accuracy" class="section level3">
+<h3><span class="header-section-number">3.1.2</span> Small comment on accuracy</h3>
+<p>Needless to say, that if you test different thresholds and you achieve better accuracies, obviously you are doing the correct thing. But, you have to take into consideration a small weakness if you use accuracy as your analysis tool: it will yield misleading results if the data set is unbalanced (that is, when the number of samples in different classes vary greatly). For example, if there were 95 cats and only 5 dogs in the data set, the classifier could easily be biased into classifying all the samples as cats. The overall accuracy would be 95%, but in practice the classifier would have a 100% recognition rate for the cat class but a 0% recognition rate for the dog class. Therefore, if you goal was to be build a machine that was able to classify both types, using accuracy wouldn’t be useful, because dogs wouldn’t be detected. This is why, you always have to study the results of the data and not rely solely on a single number or parameter.</p>
+</div>
+</div>
+<div id="roc-curves" class="section level2">
+<h2><span class="header-section-number">3.2</span> ROC curves</h2>
+<p>In statistics, a receiver operating characteristic (ROC), or ROC curve, is a graphical plot that illustrates the performance of a binary classifier system as its discrimination threshold is varied. The curve is created by plotting the true positive rate (sensitivity) against the false positive rate (1 - specificity) at various threshold settings.</p>
+<p><img src="images/13.png" width="373" /></p>
+<p>The best possible prediction method would yield a point in the upper left corner or coordinate (0,1) of the ROC space, representing 100% sensitivity (no false negatives) and 100% specificity (no false positives). The (0,1) point is also called a perfect classification.</p>
+<div id="auc---area-under-the-curve" class="section level3">
+<h3><span class="header-section-number">3.2.1</span> AUC - Area under the curve</h3>
+<p>The ROC curve motivates an important metric for classification problems: the AUC, or Area Under the Curve. The AUC of a model gives the area under the ROC curve, and is a number between 0 and 1. The higher the AUC, the more area under the ROC curve, and the better the model. The AUC of a model can be interpreted as the model’s ability to distinguish between the two different classes. If the model were handed two random observations from the dataset, one belonging to one class and one belonging to the other class, the AUC gives the proportion of the time when the observation from class 1 has a higher predicted probability of being in class 1. If you were to just guess which observation was which, this would be an AUC of 0.5. So a model with an AUC greater than 0.5 is doing something smarter than just guessing, but we want the AUC of a model to be as close to 1 as possible.</p>
+<p><img src="images/14.png" width="538" /><img src="images/15.png" width="527" /><img src="images/16.png" width="572" /></p>
+<p><br></p>
+</div>
+</div>
+</div>
+<div id="hypothesis" class="section level1">
+<h1><span class="header-section-number">4</span> Hypothesis</h1>
+<p>Recall that the hypothesis expression for linear regression was:</p>
+<p><img src="images/17.PNG" width="115" /></p>
+<p>Logistic regression cannot rely solely on a linear expression to classify, and in addition to that, using a linear classifier boundary requires the user to establish a threshold where the predicted continuous probabilities would be grouped into the different classes. This is why logistic regression makes use of the sigmoid function. Let me present the logistic regression hypothesis function:</p>
+<p><img src="images/18.PNG" width="502" /></p>
+<p><br></p>
+</div>
+<div id="understanindg-the-sigmoid-function" class="section level1">
+<h1><span class="header-section-number">5</span> Understanindg the sigmoid function</h1>
+<div id="example-1-general-sigmoid-function" class="section level2">
+<h2><span class="header-section-number">5.1</span> EXAMPLE 1: General sigmoid function</h2>
+<p><img src="images/19.PNG" width="590" /></p>
+<p>Let’s say we decide to establish a threshold of 0.5 (just to adapt to the sigmoid function cut in the Y-axis). So:</p>
+<p><img src="images/20.PNG" width="216" /></p>
+<p>In order to achieve this:</p>
+<p><img src="images/21.PNG" width="501" /></p>
+</div>
+<div id="example-2-linear-boundary" class="section level2">
+<h2><span class="header-section-number">5.2</span> EXAMPLE 2: Linear boundary</h2>
+<p>We have calculated the <span class="math inline">\(\theta\)</span> parameters of the linear expression and have the following data:</p>
+<p><img src="images/22.PNG" width="533" /></p>
+<p>Using the same analysis as we did for the general sigmoid function:</p>
+<p><img src="images/23.PNG" width="383" /><img src="images/24.PNG" width="464" /></p>
+</div>
+<div id="example-3-circular-boundary" class="section level2">
+<h2><span class="header-section-number">5.3</span> EXAMPLE 3: Circular boundary</h2>
+<p>We have calculated the <span class="math inline">\(\theta\)</span> parameters of the linear expression and have the following data:</p>
+<p><img src="images/25.PNG" width="367" /></p>
+<p>Using the same analysis as we did for the general sigmoid function:</p>
+<p><img src="images/26.PNG" width="399" /><img src="images/27.PNG" width="425" /></p>
+<p><strong>IMPORTANT NOTE! From these 3 examples we observe that the decision boundary is not directly defined by the training dataset, but by the <span class="math inline">\(\theta\)</span> parameters.</strong></p>
+<p><br></p>
+</div>
+</div>
+<div id="cost-function" class="section level1">
+<h1><span class="header-section-number">6</span> Cost function</h1>
+<p>Now that we know what the expression of our logistic regression hypothesis is, we need to know how to define the cost function in order to evaluate the errors a logistic model is going to make. Recall the cost function for linear regression:</p>
+<p><img src="images/28.PNG" width="258" /></p>
+<p>If we minimized this function applying our new <span class="math inline">\(h_??(x^{(i)})\)</span> hypothesis we cannot assure that we will converge the global minimum of the cost function! As <span class="math inline">\(h_??(x)=1/(1+e^{(??^T X)} )\)</span> is not linear we might end up in a local minimum. Therefore, our new cost function will be:</p>
+<p><img src="images/29.PNG" width="380" /><img src="images/30.PNG" width="717" /><img src="images/31.PNG" width="709" /></p>
+<div id="simplified-cost-function" class="section level2">
+<h2><span class="header-section-number">6.1</span> Simplified cost function</h2>
+<p>Thankfully, as we are dealing with a binary classification problem and y can only be 0 or 1, then the cost function can be simplified to the following expression:</p>
+<p><img src="images/32.PNG" width="547" /></p>
+</div>
+<div id="choosing-the-parameters-using-gradient-descent" class="section level2">
+<h2><span class="header-section-number">6.2</span> Choosing the ?? parameters: using gradient descent</h2>
+<p>The gradient descent iterative process used in logistic regression is exactly the same than the one used for linear regression. The only difference between both, is the input hypothesis. Therefore, the gradient descent algorithm is again:</p>
+<p><img src="images/33.PNG" width="420" /></p>
+<p><br></p>
+</div>
+</div>
+<div id="multiclass-classification" class="section level1">
+<h1><span class="header-section-number">7</span> Multiclass classification</h1>
+<p>Until now we have been only focusing on binary classification, but what happens when instead of classifying with a Yes or a No, we want to classify with many classes? For example, classifying your emails in family, work, travel, bills, etc? The answer to this is very simple: we run binary classification for all possible classes and then pick the one with the highest value.</p>
+<p><img src="images/34.PNG" width="614" /><img src="images/35.PNG" width="513" /><img src="images/36.PNG" width="524" /><img src="images/37.PNG" width="534" /></p>
+<div id="overfittingunderfitting" class="section level2">
+<h2><span class="header-section-number">7.1</span> Overfitting/underfitting</h2>
+<p>The best way to understand what is over and underfitting is showing 3 simple examples:</p>
+<p><img src="images/38.PNG" width="755" /></p>
+<p>Underfitting: clearly the model is too simple and requires additional features to adjust better to the data Overfitting: the model adjust incredibly well to the training data, but if that model is applied to the unseen data it will fail to generalise new examples.</p>
+<p>How to know if our model is overfitting? 1. In very simple models were we only use 2 parameters, we can plot the data (just like we did above) and check if the model is under or overfitting. 2. But with model were there number of features is really high, we cannot take this approach as the visualisation of the data would be extremely complicated. 2.1. This can be solved by feature reduction to then plot the data, but this will be explained in further posts. 2.2. It can be also solved by REGULARIZATION.</p>
+<p><br></p>
+</div>
+</div>
+<div id="introducing-regularization" class="section level1">
+<h1><span class="header-section-number">8</span> Introducing regularization</h1>
+<p>Suppose we have the previous models and that the regression models are the following:</p>
+<p><img src="images/39.PNG" width="639" /></p>
+<p>The general idea would be that we want to make the high order parameters (??3 and ??4) really small to have a simple model that would be less prone to overfitting.</p>
+<p><img src="images/40.PNG" width="733" /></p>
+<p>Perfect, by doing this we have reduced our function to a second order model which is simpler. But again, in this case we know which the high order terms are. How do we then deal with the general case were we might have 100 features? How do we know which is/are the high order terms? In order to tackle this issue, we introduce the REGULARIZATION PARAMETER.</p>
+<div id="regularised-linear-regression" class="section level2">
+<h2><span class="header-section-number">8.1</span> Regularised linear regression</h2>
+<p>Cost function:</p>
+<p><img src="images/41.PNG" width="374" /></p>
+<p>Gradient descent:</p>
+<p><img src="images/42.PNG" width="491" /></p>
+</div>
+<div id="regularised-logistic-regression" class="section level2">
+<h2><span class="header-section-number">8.2</span> Regularised logistic regression</h2>
+<p>Cost function:</p>
+<p><img src="images/43.PNG" width="652" /></p>
+<p>Gradient descent:</p>
+<p><img src="images/42.PNG" width="491" /></p>
+</div>
+<div id="final-intuitation-for-the-regularization-parameter" class="section level2">
+<h2><span class="header-section-number">8.3</span> Final intuitation for the regularization parameter</h2>
+<p>Even though in following posts we will be looking into this regularization parameters in more details, I wanted to show you a simple example on how can <span class="math inline">\(\lambda\)</span> affect the model. Suppose we have the same example as before and we choose a huge value for <span class="math inline">\(\lambda\)</span>:</p>
+<p><img src="images/44.PNG" width="737" /></p>
+</div>
+</div>
+<div id="visualising-the-data" class="section level1">
+<h1><span class="header-section-number">9</span> Visualising the data</h1>
+<p>In this case we will learn implement regularized logistic regression to predict whether microchips from a fabrication plant passes quality assurance (QA). During QA, each microchip goes through various tests to ensure it is functioning correctly. Suppose you are the product manager of the factory and you have the test results for some microchips on two different tests. From these two tests, you would like to determine whether the microchips should be accepted or rejected. To help you make the decision, you have a dataset of test results on past microchips, from which you can build a logistic regression model.</p>
+<p>Data sample:</p>
+<p><img src="images/45.PNG" width="721" /></p>
+<p>Plotting the data:</p>
+<p><img src="images/46.png" width="561" /></p>
+<p>The figure shows that our dataset cannot be separated into positive and negative examples by a straight-line through the plot. Therefore, a straight-forward application of logistic regression will not perform well on this dataset since logistic regression will only be able to find a linear decision boundary.</p>
+<div id="how-to-fix-this" class="section level2">
+<h2><span class="header-section-number">9.1</span> How to fix this?</h2>
+<ol style="list-style-type: decimal">
+<li>One way is to create more features more each data point, ie, creating polynomial features for each x1 and x2. For example, we could create a vector. What have we achieved with this? Well, firstly we had only a 2 dimensional vector with x1 and x2, and now we have 28 dimensional vector. Obviously, applying a straight forward logistic regression on a 28 dimensional vector will have a more complex decision boundary and will appear nonlinear. HOWEVER, this strategy is much more susceptible to overfitting.</li>
+</ol>
+<p><img src="images/47.PNG" width="224" /></p>
+<ol start="2" style="list-style-type: decimal">
+<li>To try to apply a non-linear decision boundary and at the same time tackle the overfitting issue that a high dimensional vector can introduce, we will introduce regularization parameters to our logistic regression model.</li>
+</ol>
+</div>
+<div id="calculations" class="section level2">
+<h2><span class="header-section-number">9.2</span> Calculations</h2>
+<p><img src="images/48.PNG" width="715" /></p>
+<p>To show a numeric example of how the choosing / optimization of the theta values affect the cost of the model, let´s say we decide that THETA parameters are all equal to zero:</p>
+<p><img src="images/49.PNG" width="286" /></p>
+<p>This is our starting point to compare if the model is actually converging to a minimum. In linear regression, we understood how gradient descent worked. In this case, I want to present another way to deal with the optimization of the theta parameters that minimize the cost function. This method is a function already built in Matlab called FMINUNC. Here is the code to use it:</p>
+<p>% Set regularization parameter lambda to 1 (you should vary this) lambda = 1;</p>
+<p>% Set Options options = optimset(‘GradObj’, ‘on’, ‘MaxIter’, 400);</p>
+<p>% Optimize [theta, J, exit_flag] = … fminunc(@(t)(costFunctionReg(t, X, y, lambda)), initial_theta, options);</p>
+<p>fminunc will call the cost function (in this case, you have to code this function yourself. You can implement the simplified cost function for logistic regression shown above), a random initial theta, and some debugging parameters like the maximum iterations we want and that we want fminunc to return both the theta parameters and the cost function.</p>
+<p><img src="images/50.PNG" width="369" /></p>
+<p>The results show that we have improved the model by choosing some thetas that have drastically reduced the magnitude of the cost function. Let´s plot the decision boundary that the logistic regression model has created:</p>
+<p><img src="images/51.png" width="561" /></p>
+<p>The graph shows the linear boundary the logistic regression model has created. It pretty much divides correctly most example, although there are some were the model incorrectly predicts the real outcome. Let´s evaluate the accuracy of these training examples (in this case we haven´t produced a test set in which to produce accuracy tests of unseen data). As we saw in logistic theory, the logistic regression model returns probabilities of each of the examples belonging to different classes. To finally classify in a binary classification model like this one, we need to establish a threshold. Let´s evaluate the performance of the model with different thresholds. These different selection will show the effect the threshold has in the model´s accuracy and which one would suit best your specific problem.</p>
+<p><img src="images/52.PNG" width="730" /><img src="images/53.PNG" width="721" /><img src="images/54.PNG" width="729" /></p>
+<p>Taking into consideration the nature of the problem, if we want to detect those microchips that have defects we need to decide which threshold are we going to apply to the model. This decision would need to take into consideration many factors such as chip manufacturing costs (just in case we throw away non-defective chips that were labelled as defective), costs related to delivering bad quality chips etc. Let´s say that we want to detect as many defective chips as possible. To do that we will like to only categorise as 1´s (accepted) the ones that have a very high probability, in other words, their quality parameters are nearly perfect. If we are very selective when categorising as 1´s, then we are allowing more chips to be labelled as defective. Our accuracy would decrease, but you would be flagging nearly all (if not all) defective chips. Again, this is just a really simplified way of thinking about quality checks but it is useful to understand threshold selection and the logistic regression classification model.</p>
+</div>
+<div id="effect-of-lambda" class="section level2">
+<h2><span class="header-section-number">9.3</span> Effect of lambda</h2>
+<p>For “educational” purposes, just as I did with different threshold selections, in this case we will see the effect of lambda in the logistic regression model. In the theory section, we learnt that lambda acts as a parameter that controls high order features, in other words, it control under and overfitting behaviours. Let´s see what happens to the model when choosing different lamda parameters.</p>
+<p><img src="images/55.png" width="561" /><img src="images/56.png" width="561" /></p>
+<p>With a regularization parameter lambda = 0, no high order features are controlled or attenuated, and therefore the model is much more prone to suffer overfitting.</p>
+<p><img src="images/57.png" width="561" /></p>
+</div>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
